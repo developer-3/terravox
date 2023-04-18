@@ -39,6 +39,13 @@ namespace vpr {
 
         void RenderGL();
 
+        // Voxel Gen
+        template <typename T>
+        T Clamp(const T& value, const T& minValue, const T& maxValue);
+
+        std::vector<glm::ivec3> generate_voxel(int horz_axis_res, float vert_axis_ratio, float scale, int depth, float param_1 = 3, float param_2 = -2, float param_3 = -2);
+        float hilly_terrain(float x, float y, float scale = 1, float param_1 = 3, float param_2 = -2, float param_3 = -2);
+
         // meshes
         CMesh box;
         CMesh cylinder;

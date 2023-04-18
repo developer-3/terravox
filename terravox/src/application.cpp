@@ -55,7 +55,7 @@ namespace vpr {
 
 
         // Loading in textures and objs
-        mesh_tex.LoadFile("src/textures/wavy.png");
+        mesh_tex.LoadFile("src/textures/grassy.png");
 
         cylinder.LoadOBJ("src/models/cylinder1.obj");
         cylinder.m_program = LoadShaders("src/shaders/coordinates.vs", "src/shaders/transform.fs");
@@ -107,14 +107,7 @@ namespace vpr {
 
     void Application::RenderGL()
     {
-
-        glm::vec3 cubePositions[] = {
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(2.0f, 5.0f, -15.0f),
-            glm::vec3(1.0f, -4.0f, 2.0f),
-            glm::vec3(-1.5f, -2.2f, -3.0f),
-            glm::vec3(-1.7f, 3.0f, -7.0f),
-        };
+        std::vector<glm::ivec3> cubePositions = generate_voxel(100, 0.5f, 1.0f, 3);
 
         glUseProgram(box.m_program);
 
@@ -133,13 +126,81 @@ namespace vpr {
         glBindTexture(GL_TEXTURE_2D, mesh_tex.TexName());
         
         // Draw each cube at a different location
-        for (unsigned int i = 0; i < 5; i++)
+        for (unsigned int i = 0; i < cubePositions.size(); i++)
         {
-            glm::mat4 model = glm::rotate(glm::translate(glm::mat4(1.0f), cubePositions[i]), glm::radians(20.0f * i), glm::vec3(1.0f, 0.3f, 0.5f));
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(cubePositions[i].x, cubePositions[i].z, cubePositions[i].y));
             glUniformMatrix4fv(glGetUniformLocation(box.m_program, "model"), 1, GL_FALSE, glm::value_ptr(model));
             box.RenderGL();
         }
     }
+
+    float Application::hilly_terrain(float x, float y, float scale, float param_1, float param_2, float param_3) 
+    {
+        float x_scaled = x * scale;
+        float y_scaled = y * scale;
+        return std::sin(param_1 * x_scaled) * std::sin(param_2 * y_scaled) + std::exp(param_3 * ((x_scaled - 0.5) * (x_scaled - 0.5) + (y_scaled - 0.5) * (y_scaled - 0.5)));
+    }
+
+    std::vector<glm::ivec3> Application::generate_voxel(int horz_axis_res, float vert_axis_ratio, float scale, int depth, float param_1, float param_2, float param_3) 
+    {
+        int vert_axis_res = static_cast<int>(horz_axis_res * vert_axis_ratio);
+
+        std::vector<float> x_range(horz_axis_res);
+        std::vector<float> y_range(horz_axis_res);
+        for (int i = 0; i < horz_axis_res; ++i) {
+            x_range[i] = -1 + 2 * static_cast<float>(i) / (horz_axis_res - 1);
+            y_range[i] = -1 + 2 * static_cast<float>(i) / (horz_axis_res - 1);
+        }
+
+        std::vector<std::vector<float>> z(horz_axis_res, std::vector<float>(horz_axis_res));
+        float z_min = std::numeric_limits<float>::max();
+        float z_max = std::numeric_limits<float>::min();
+        for (int i = 0; i < horz_axis_res; ++i) {
+            for (int j = 0; j < horz_axis_res; ++j) {
+                z[i][j] = hilly_terrain(x_range[i], y_range[j], scale, param_1, param_2, param_3);
+                z_min = std::min(z_min, z[i][j]);
+                z_max = std::max(z_max, z[i][j]);
+            }
+        }
+
+        std::vector<std::vector<int>> z_index(horz_axis_res, std::vector<int>(horz_axis_res));
+        for (int i = 0; i < horz_axis_res; ++i) {
+            for (int j = 0; j < horz_axis_res; ++j) {
+                z[i][j] = (z[i][j] - z_min) / (z_max - z_min);
+                z_index[i][j] = Clamp(static_cast<int>(std::round(z[i][j] * vert_axis_res)) - 1, 1, vert_axis_res);
+            }
+        }
+
+        std::vector<std::vector<std::vector<int>>> voxel(horz_axis_res, std::vector<std::vector<int>>(horz_axis_res, std::vector<int>(vert_axis_res, 0)));
+        for (int i = 0; i < horz_axis_res; ++i) {
+            for (int j = 0; j < horz_axis_res; ++j) {
+                for (int k = std::max(z_index[i][j] - depth, 0); k < z_index[i][j]; ++k) {
+                    voxel[i][j][k] = 1;
+                }
+            }
+        }
+
+        std::vector<glm::ivec3> result;
+        for (int i = 0; i < horz_axis_res; ++i) {
+            for (int j = 0; j < horz_axis_res; ++j) {
+                for (int k = 0; k < vert_axis_res; ++k) {
+                    if (voxel[i][j][k] == 1) {
+                        result.push_back(glm::ivec3(i, j, k));
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    template <typename T>
+    T Application::Clamp(const T& value, const T& minValue, const T& maxValue)
+    {
+        return (std::min)(maxValue, (std::max)(minValue, value));
+    }
+
+
 
     GLuint Application::LoadShaders(const char* vertex_file_path, const char* fragment_file_path)
     {
