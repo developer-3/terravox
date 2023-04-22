@@ -57,6 +57,20 @@ void CMesh::RenderGL()
 	glDrawArrays(GL_TRIANGLES, 0, vertexArray.size());
 }
 
+void CMesh::RenderTop()
+{
+	glUseProgram(m_program);
+	glBindVertexArray(m_vao);
+	glDrawArrays(GL_TRIANGLES, 12, 18);
+}
+
+void CMesh::RenderSideBottom()
+{
+	glUseProgram(m_program);
+	glBindVertexArray(m_vao);
+	glDrawArrays(GL_TRIANGLES, 6, vertexArray.size() - 6);
+}
+
 void CMesh::AddTriangleVertex(int v, int n, int t)
 {
 	TV tv;
@@ -201,6 +215,15 @@ void CMesh::CreateCube()
 	AddNormal(glm::vec3(0, -1, 0));
 	AddNormal(glm::vec3(0, 0, 1));
 	AddNormal(glm::vec3(0, 0, -1));
+
+	//float x = 6, y = 1;
+	//float sheetWidth = 2560.0f, sheetHeight = 1664.0f;
+	//float spriteWidth = 128.0f, spriteHeight = 128.0f;
+
+	//AddTexCoord(glm::vec2(x * spriteWidth / sheetWidth, y * spriteHeight / sheetHeight));
+	//AddTexCoord(glm::vec2((x+1) * spriteWidth / sheetWidth, y * spriteHeight / sheetHeight));
+	//AddTexCoord(glm::vec2((x+1) * spriteWidth / sheetWidth, (y+1) * spriteHeight / sheetHeight));
+	//AddTexCoord(glm::vec2(x * spriteWidth / sheetWidth, (y+1) * spriteHeight / sheetHeight));
 
 	AddTexCoord(glm::vec2(0, 0));
 	AddTexCoord(glm::vec2(1, 0));

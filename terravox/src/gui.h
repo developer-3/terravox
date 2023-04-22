@@ -9,12 +9,15 @@
 
 #include <stdio.h>
 
+#define GLEW_STATIC
+#include <GL/glew.h>
+
 #include <GLFW/glfw3.h>
 #include "imgui.h"
 
 #include "window.h"
 
-namespace vpr {
+namespace tvox {
 
 
     class GUI {
@@ -28,6 +31,8 @@ namespace vpr {
 
         void render();
         void setShowGui() { show = !show; }
+
+        void image(GLuint texture_id);
 
     private:
         bool show = true;

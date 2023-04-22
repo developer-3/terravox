@@ -11,7 +11,7 @@
 
 #include <string>
 
-namespace vpr {
+namespace tvox {
 
     class Window {
     public:

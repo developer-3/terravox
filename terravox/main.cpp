@@ -13,7 +13,7 @@
 #include <stdexcept>
 
 int main() {
-    vpr::Application app{};
+    tvox::Application app{};
 
     try {
         app.run();

@@ -18,9 +18,9 @@
 
 #include <stdio.h>
 
-namespace vpr {
-    static constexpr int WIDTH = 1600;
-    static constexpr int HEIGHT = 1240;
+namespace tvox {
+    static constexpr int WIDTH = 1920;
+    static constexpr int HEIGHT = 1080;
 
     class Input {
     public:
@@ -32,7 +32,7 @@ namespace vpr {
         void ProcessInput(GLFWwindow* window);
 
         glm::mat4 View() { return glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp); }
-        glm::mat4 Perspective() { return glm::perspective(glm::radians(fov), (float)vpr::WIDTH / (float)vpr::HEIGHT, 0.1f, 100.0f); }
+        glm::mat4 Perspective() { return glm::perspective(glm::radians(fov), (float)tvox::WIDTH / (float)tvox::HEIGHT, 0.1f, 100.0f); }
 
 
         void CursorPosition(double xpos, double ypos);
@@ -49,12 +49,14 @@ namespace vpr {
 
         // mouse state
         bool firstMouse = true;
-        float lastX = vpr::WIDTH / 2.0f;
-        float lastY = vpr::HEIGHT / 2.0f;
+        float lastX = tvox::WIDTH / 2.0f;
+        float lastY = tvox::HEIGHT / 2.0f;
 
         // timing
         float deltaTime = 0.0f;
         float lastFrame = 0.0f;
+
+        bool tabHeld = false;
     };
 
 }

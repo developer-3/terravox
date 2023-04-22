@@ -7,7 +7,7 @@
 
 #include "window.h"
 
-namespace vpr {
+namespace tvox {
 
     Window::Window(int w, int h, std::string name) : width{ w }, height{ h }, windowName{ name }
     {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -15,8 +16,11 @@ public:
     virtual ~CMesh(void);
 
     void InitGL();
-    void RenderGL();
+    virtual void RenderGL();
     void CleanGL();
+
+    void RenderTop();
+    void RenderSideBottom();
 
     GLuint m_program;
     GLuint m_vao;
@@ -31,7 +35,7 @@ public:
     void AddTexCoord(const glm::vec2& t) { m_tvertices.push_back(t); }
     void AddTriangleVertex(int v, int n, int t);
 
-private:
+protected:
     std::vector<glm::vec3> m_vertices;
     std::vector<glm::vec3> m_normals;
     std::vector<glm::vec2> m_tvertices;

@@ -14,6 +14,8 @@ using namespace std;
 #define GLEW_STATIC
 #include <GL/glew.h>
 
+#include <GLFW/glfw3.h>
+
 #include "glm.hpp"
 #include "gtc/matrix_transform.hpp"
 #include "gtc/type_ptr.hpp"
@@ -22,9 +24,11 @@ using namespace std;
 #include "gui.h"
 #include "input.h"
 #include "graphics/Mesh.h"
-#include "Texture.h"
+#include "graphics/Texture.h"
+#include "graphics/CubeTexture.h"
+#include "graphics/Voxel.h"
 
-namespace vpr {
+namespace tvox {
 
     class Application {
     public:
@@ -47,13 +51,16 @@ namespace vpr {
         float hilly_terrain(float x, float y, float scale = 1, float param_1 = 3, float param_2 = -2, float param_3 = -2);
 
         // meshes
-        CMesh box;
-        CMesh cylinder;
-        Texture mesh_tex;
+        CubeTexture skybox_tex;
+        CMesh skybox;
+
+        Texture texture_atlas;
+
+        Voxel vox{ 0 };
 
     private:
-        Window window{ vpr::WIDTH, vpr::HEIGHT, "TerraVox" };
-        static vpr::GUI gui;
+        Window window{ tvox::WIDTH, tvox::HEIGHT, "terravox" };
+        static tvox::GUI gui;
         static Input input;
 
         GLuint m_program;

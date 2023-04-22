@@ -7,7 +7,7 @@
 
 #include "input.h"
 
-namespace vpr {
+namespace tvox {
 
     Input::Input()
     {}
@@ -41,6 +41,26 @@ namespace vpr {
         {
             cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
         }
+        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        {
+            cameraPos += cameraUp * cameraSpeed;
+        }
+        if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+        {
+            cameraPos -= cameraUp * cameraSpeed;
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS && tabHeld == false)
+        {
+            if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED)
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            else
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+            tabHeld = true;
+        }
+        else if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_RELEASE && tabHeld == true)
+            tabHeld = false;
     }
 
     void Input::CursorPosition(double xpos, double ypos)

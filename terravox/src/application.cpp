@@ -11,22 +11,22 @@
 
 #include <iostream>
 
-namespace vpr {
+namespace tvox {
 
-    vpr::GUI Application::gui;
-    vpr::Input Application::input;
+    tvox::GUI Application::gui;
+    tvox::Input Application::input;
 
     void Application::run() {
-        glClearColor(0.1, 0.1, 0.1, 1);
-        glEnable(GL_DEPTH_TEST);
 
         glViewport(0, 0, WIDTH, HEIGHT);
 
-        gui.gui_init(window.getWindow());
-
+        // Initialize glfw callbacks for key and mouse input
         glfwSetMouseButtonCallback(window.getWindow(), Application::mouse_button_callback);
         glfwSetCursorPosCallback(window.getWindow(), Application::cursor_position_callback);
         glfwSetScrollCallback(window.getWindow(), Application::scroll_callback);
+
+        // Init gui after setting glfw callbacks
+        gui.gui_init(window.getWindow());
 
         glewExperimental = GL_TRUE;
         if (glewInit() != GLEW_OK) {
@@ -55,18 +55,19 @@ namespace vpr {
 
 
         // Loading in textures and objs
-        mesh_tex.LoadFile("src/textures/grassy.png");
+        skybox_tex.LoadFiles("src/textures/right.jpg", "src/textures/left.jpg", "src/textures/top.jpg", "src/textures/bottom.jpg", "src/textures/front.jpg", "src/textures/back.jpg");
+        skybox.CreateCube();
+        skybox.m_program = LoadShaders("src/shaders/vertexsky.glsl", "src/shaders/fragmentSky.glsl");
+        skybox.InitGL();
 
-        cylinder.LoadOBJ("src/models/cylinder1.obj");
-        cylinder.m_program = LoadShaders("src/shaders/coordinates.vs", "src/shaders/transform.fs");
-        cylinder.InitGL();
+        texture_atlas.LoadFile("src/textures/block/RPGpack_sheet_2X.png");
 
-        box.CreateCube();
-        box.m_program = LoadShaders("src/shaders/coordinates.vs", "src/shaders/transform.fs");
-        box.InitGL();
+        vox.CreateCube();
+        vox.m_program = LoadShaders("src/shaders/vertexVoxel.glsl", "src/shaders/fragment-basic.glsl");
+        vox.InitGL();
 
         glClearColor(0.2, 0.6, 0.4, 1.);
-
+        glEnable(GL_DEPTH_TEST);
 
         while (!window.shouldClose()) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -76,14 +77,14 @@ namespace vpr {
 
             // Process input
             input.ProcessInput(window.getWindow());
-
-            // gui render
-            /*gui.gui_start();
-            gui.render();
-            gui.gui_end();*/
             
-            // render
+            // render meshes
             RenderGL();
+
+            // render gui
+            gui.gui_start();
+            gui.render();
+            gui.gui_end();
 
             /* Swap front and back buffers */
             window.swapBuffers();
@@ -97,7 +98,10 @@ namespace vpr {
 
     void Application::cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
     {
-        input.CursorPosition(xpos, ypos);
+        ImGuiIO& io = ImGui::GetIO();
+        
+        if (!io.WantCaptureMouse)
+            input.CursorPosition(xpos, ypos);
     }
 
     void Application::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -107,9 +111,9 @@ namespace vpr {
 
     void Application::RenderGL()
     {
-        std::vector<glm::ivec3> cubePositions = generate_voxel(100, 0.5f, 1.0f, 3);
+        std::vector<glm::ivec3> cubePositions = generate_voxel(50, 0.5f, 1.0f, 3);
 
-        glUseProgram(box.m_program);
+        glUseProgram(vox.m_program);
 
         // camera spin
         //float radius = 10.0f;
@@ -118,20 +122,35 @@ namespace vpr {
 
 
         // Set View and Perspective in shader
-        glUniformMatrix4fv(glGetUniformLocation(box.m_program, "view"), 1, GL_FALSE, glm::value_ptr(input.View()));
-        glUniformMatrix4fv(glGetUniformLocation(box.m_program, "projection"), 1, GL_FALSE, glm::value_ptr(input.Perspective()));
+        glUniformMatrix4fv(glGetUniformLocation(vox.m_program, "view"), 1, GL_FALSE, glm::value_ptr(input.View()));
+        glUniformMatrix4fv(glGetUniformLocation(vox.m_program, "projection"), 1, GL_FALSE, glm::value_ptr(input.Perspective()));
 
         // Bind the texture
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, mesh_tex.TexName());
-        
+        glBindTexture(GL_TEXTURE_2D, texture_atlas.TexName());
+
         // Draw each cube at a different location
         for (unsigned int i = 0; i < cubePositions.size(); i++)
         {
             glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(cubePositions[i].x, cubePositions[i].z, cubePositions[i].y));
-            glUniformMatrix4fv(glGetUniformLocation(box.m_program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-            box.RenderGL();
+            glUniformMatrix4fv(glGetUniformLocation(vox.m_program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+
+            vox.RenderGL();
         }
+
+        // skybox
+        glDepthMask(GL_FALSE);
+        glUseProgram(skybox.m_program);
+        glUniform1i(glGetUniformLocation(skybox.m_program, "skybox"), 0);
+
+        glUniformMatrix4fv(glGetUniformLocation(skybox.m_program, "view"), 1, GL_FALSE, glm::value_ptr(glm::mat4(glm::mat3(input.View()))));
+        glUniformMatrix4fv(glGetUniformLocation(skybox.m_program, "projection"), 1, GL_FALSE, glm::value_ptr(input.Perspective()));
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, skybox_tex.TexName());
+        glDepthFunc(GL_LEQUAL);
+        skybox.RenderGL();
+        glDepthMask(GL_TRUE);
     }
 
     float Application::hilly_terrain(float x, float y, float scale, float param_1, float param_2, float param_3) 

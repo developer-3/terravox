@@ -10,7 +10,9 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-namespace vpr {
+#include "stb_image.h"
+
+namespace tvox {
 
     GUI::GUI() {
         IMGUI_CHECKVERSION();
@@ -27,7 +29,7 @@ namespace vpr {
     void GUI::gui_init(GLFWwindow* window) {
         ImGui::StyleColorsDark();
         ImGui_ImplGlfw_InitForOpenGL(window, true);
-        ImGui_ImplOpenGL3_Init("#version 120");
+        ImGui_ImplOpenGL3_Init("#version 330");
     }
 
     void GUI::gui_start() {
@@ -60,10 +62,21 @@ namespace vpr {
     }
 
     void GUI::render() {
-        if (!show)
-            return;
+ /*       if (!show)
+            return;*/
         ImGui::Begin("Hello, world");
         ImGui::Text("Hello, world %d", 123);
+        ImGui::End();
+    }
+
+    void GUI::image(GLuint texture_id) {
+        ImGui::Begin("Image Window");
+
+        // Bind the texture to the shader program
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture_id);
+        ImGui::Image((void*)(intptr_t)texture_id, ImVec2(2560, 1664));
+
         ImGui::End();
     }
 
