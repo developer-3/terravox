@@ -68,6 +68,7 @@ namespace tvox {
 
         glClearColor(0.2, 0.6, 0.4, 1.);
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
 
         while (!window.shouldClose()) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -140,6 +141,7 @@ namespace tvox {
 
         // skybox
         glDepthMask(GL_FALSE);
+        glDisable(GL_CULL_FACE);
         glUseProgram(skybox.m_program);
         glUniform1i(glGetUniformLocation(skybox.m_program, "skybox"), 0);
 
@@ -151,6 +153,7 @@ namespace tvox {
         glDepthFunc(GL_LEQUAL);
         skybox.RenderGL();
         glDepthMask(GL_TRUE);
+        glEnable(GL_CULL_FACE);
     }
 
     float Application::hilly_terrain(float x, float y, float scale, float param_1, float param_2, float param_3) 
