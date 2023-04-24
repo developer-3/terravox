@@ -200,6 +200,7 @@
     <None Include="src\shaders\vertex.glsl" />
     <None Include="src\shaders\vertexsky.glsl" />
     <None Include="src\shaders\vertexVoxel.glsl" />
+    <None Include="src\shaders\vVoxelInstance.glsl" />
     <None Include="src\textures\atlases\blocks.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

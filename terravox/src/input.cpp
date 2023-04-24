@@ -24,7 +24,7 @@ namespace tvox {
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, true);
 
-        float cameraSpeed = 10.5 * deltaTime;
+        float cameraSpeed = speed * deltaTime;
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         {
             cameraPos += cameraSpeed * cameraFront;
@@ -53,9 +53,16 @@ namespace tvox {
         if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS && tabHeld == false)
         {
             if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED)
+            {
                 glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                wantMouse = false;
+            }
             else
+            {
                 glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                wantMouse = true;
+                firstMouse = true;
+            }
 
             tabHeld = true;
         }
@@ -65,6 +72,9 @@ namespace tvox {
 
     void Input::CursorPosition(double xpos, double ypos)
     {
+        if (!wantMouse)
+            return;
+
         if (firstMouse)
         {
             lastX = xpos;

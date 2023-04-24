@@ -32,7 +32,7 @@ namespace tvox {
         void ProcessInput(GLFWwindow* window);
 
         glm::mat4 View() { return glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp); }
-        glm::mat4 Perspective() { return glm::perspective(glm::radians(fov), (float)tvox::WIDTH / (float)tvox::HEIGHT, 0.1f, 100.0f); }
+        glm::mat4 Perspective() { return glm::perspective(glm::radians(fov), (float)tvox::WIDTH / (float)tvox::HEIGHT, 0.1f, 300.0f); }
 
 
         void CursorPosition(double xpos, double ypos);
@@ -47,6 +47,8 @@ namespace tvox {
         float pitch = 0.0f;
         float fov = 45.0f;
 
+        float speed = 20.0f;
+
         // mouse state
         bool firstMouse = true;
         float lastX = tvox::WIDTH / 2.0f;
@@ -57,6 +59,7 @@ namespace tvox {
         float lastFrame = 0.0f;
 
         bool tabHeld = false;
+        bool wantMouse = true;
     };
 
 }

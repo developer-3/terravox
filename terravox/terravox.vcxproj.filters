@@ -130,5 +130,6 @@
     <None Include="src\shaders\fragmentCube.glsl" />
     <None Include="src\textures\atlases\blocks.json" />
     <None Include="src\shaders\vertexVoxel.glsl" />
+    <None Include="src\shaders\vVoxelInstance.glsl" />
   </ItemGroup>
 </Project>

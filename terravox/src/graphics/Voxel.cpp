@@ -50,6 +50,68 @@ namespace tvox {
         glDrawArrays(GL_TRIANGLES, 0, vertexArray.size());
     }
 
+    void Voxel::RenderInstancedGL(int numInstances)
+    {
+        glUseProgram(m_program);
+        for (int i = 0; i < 6; i++)
+        {
+            glm::vec4 side(texCoords.at(i * 4), texCoords.at(i * 4 + 1), texCoords.at(i * 4 + 2), texCoords.at(i * 4 + 3));
+            glUniform4f(glGetUniformLocation(m_program, sideNames[i]), side.x, side.y, side.z, side.w);
+        }
+
+        glBindVertexArray(m_vao);
+        glDrawArraysInstanced(GL_TRIANGLES, 0, vertexArray.size(), numInstances);
+    }
+
+    void Voxel::InitGL(std::vector<glm::vec3> positions)
+    {
+        for (PTV v = m_triangles.begin(); v != m_triangles.end(); v++)
+        {
+            normalArray.push_back(m_normals[v->n]);
+            vertexArray.push_back(m_vertices[v->v]);
+            texArray.push_back(m_tvertices[v->t]);
+        }
+        positionArray = positions;
+
+        glGenVertexArrays(1, &m_vao);
+        glBindVertexArray(m_vao);
+
+        // Vertex positions
+        glGenBuffers(1, &m_vertexVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, m_vertexVBO);
+        glBufferData(GL_ARRAY_BUFFER, vertexArray.size() * sizeof(glm::vec3),
+            &vertexArray[0], GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+        // Normals
+        glGenBuffers(1, &m_normalVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, m_normalVBO);
+        glBufferData(GL_ARRAY_BUFFER, normalArray.size() * sizeof(glm::vec3),
+            &normalArray[0], GL_STATIC_DRAW);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+        // Texture coords
+        glGenBuffers(1, &m_texVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, m_texVBO);
+        glBufferData(GL_ARRAY_BUFFER, texArray.size() * sizeof(glm::vec2),
+            &texArray[0], GL_STATIC_DRAW);
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+
+        // Set up instancing 
+        glGenBuffers(1, &instanceVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+        glBufferData(GL_ARRAY_BUFFER, positionArray.size() * sizeof(glm::vec3), &positionArray[0], GL_STATIC_DRAW);
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+        glVertexAttribDivisor(3, 1);
+
+
+    }
+
 }
 
 /*

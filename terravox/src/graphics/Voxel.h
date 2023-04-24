@@ -21,12 +21,18 @@ public:
     Voxel(int v_id);
     virtual ~Voxel(void);
 
+    void InitGL(std::vector<glm::vec3> positions);
     void RenderGL() override;
+
+    void RenderInstancedGL(int);
+
+    unsigned int instanceVBO;
 
 private:
     int voxel_id;
 
     std::vector<float> texCoords;
+    std::vector<glm::vec3> positionArray;
 
     std::vector<const char *> sideNames{ "frontTexCoords", "backTexCoords", "topTexCoords", "bottomTexCoords", "rightTexCoords", "leftTexCoords" };
 };

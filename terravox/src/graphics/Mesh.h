@@ -15,7 +15,7 @@ public:
     CMesh(void);
     virtual ~CMesh(void);
 
-    void InitGL();
+    virtual void InitGL();
     virtual void RenderGL();
     void CleanGL();
 

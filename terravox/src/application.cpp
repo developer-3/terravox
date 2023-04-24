@@ -62,9 +62,12 @@ namespace tvox {
 
         texture_atlas.LoadFile("src/textures/block/RPGpack_sheet_2X.png");
 
+        // Init voxels
+        cubePositions = generate_voxel(genVoxelNumber, 0.5f, 1.0f, 3);
+
         vox.CreateCube();
-        vox.m_program = LoadShaders("src/shaders/vertexVoxel.glsl", "src/shaders/fragment-basic.glsl");
-        vox.InitGL();
+        vox.m_program = LoadShaders("src/shaders/vVoxelInstance.glsl", "src/shaders/fragment-basic.glsl");
+        vox.InitGL(cubePositions);
 
         glClearColor(0.2, 0.6, 0.4, 1.);
         glEnable(GL_DEPTH_TEST);
@@ -79,13 +82,23 @@ namespace tvox {
             // Process input
             input.ProcessInput(window.getWindow());
             
-            // render meshes
+            // render the scene
             RenderGL();
 
             // render gui
             gui.gui_start();
-            gui.render();
+            ImGui::Begin("Voxels");
+            bool changed = ImGui::SliderInt("Voxels", &genVoxelNumber, 30, 200);
+            ImGui::Text("Instances: %d", cubePositions.size());
+            ImGui::End();
             gui.gui_end();
+
+            // this is rly slow to do at runtime
+            if (changed)
+            {
+                cubePositions = generate_voxel(genVoxelNumber, 0.5f, 1.0f, 3);
+                vox.InitGL(cubePositions);
+            }
 
             /* Swap front and back buffers */
             window.swapBuffers();
@@ -112,32 +125,19 @@ namespace tvox {
 
     void Application::RenderGL()
     {
-        std::vector<glm::ivec3> cubePositions = generate_voxel(50, 0.5f, 1.0f, 3);
-
+        // voxels
+        // Use the voxel shader program
         glUseProgram(vox.m_program);
-
-        // camera spin
-        //float radius = 10.0f;
-        //float camX = sin(glfwGetTime()) * radius;
-        //float camY = cos(glfwGetTime()) * radius;
-
 
         // Set View and Perspective in shader
         glUniformMatrix4fv(glGetUniformLocation(vox.m_program, "view"), 1, GL_FALSE, glm::value_ptr(input.View()));
         glUniformMatrix4fv(glGetUniformLocation(vox.m_program, "projection"), 1, GL_FALSE, glm::value_ptr(input.Perspective()));
 
-        // Bind the texture
+        // Bind the texture atlas
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture_atlas.TexName());
 
-        // Draw each cube at a different location
-        for (unsigned int i = 0; i < cubePositions.size(); i++)
-        {
-            glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(cubePositions[i].x, cubePositions[i].z, cubePositions[i].y));
-            glUniformMatrix4fv(glGetUniformLocation(vox.m_program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-
-            vox.RenderGL();
-        }
+        vox.RenderInstancedGL(cubePositions.size());
 
         // skybox
         glDepthMask(GL_FALSE);
@@ -163,7 +163,7 @@ namespace tvox {
         return std::sin(param_1 * x_scaled) * std::sin(param_2 * y_scaled) + std::exp(param_3 * ((x_scaled - 0.5) * (x_scaled - 0.5) + (y_scaled - 0.5) * (y_scaled - 0.5)));
     }
 
-    std::vector<glm::ivec3> Application::generate_voxel(int horz_axis_res, float vert_axis_ratio, float scale, int depth, float param_1, float param_2, float param_3) 
+    std::vector<glm::vec3> Application::generate_voxel(int horz_axis_res, float vert_axis_ratio, float scale, int depth, float param_1, float param_2, float param_3) 
     {
         int vert_axis_res = static_cast<int>(horz_axis_res * vert_axis_ratio);
 
@@ -202,12 +202,12 @@ namespace tvox {
             }
         }
 
-        std::vector<glm::ivec3> result;
+        std::vector<glm::vec3> result;
         for (int i = 0; i < horz_axis_res; ++i) {
             for (int j = 0; j < horz_axis_res; ++j) {
                 for (int k = 0; k < vert_axis_res; ++k) {
                     if (voxel[i][j][k] == 1) {
-                        result.push_back(glm::ivec3(i, j, k));
+                        result.push_back(glm::vec3(i, k, j));
                     }
                 }
             }
