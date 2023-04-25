@@ -11,6 +11,8 @@
 
 #include <iostream>
 
+#include "Terrain.h"
+
 namespace tvox {
 
     tvox::GUI Application::gui;
@@ -63,13 +65,13 @@ namespace tvox {
         texture_atlas.LoadFile("src/textures/block/RPGpack_sheet_2X.png");
 
         // Init voxels
-        cubePositions = generate_voxel(genVoxelNumber, 0.5f, 1.0f, 3);
+        //cubePositions = generate_voxel(genVoxelNumber, 0.3f, 1.0f, 50);
+        cubePositions = Terrain::GeneratePerlinTerrain(200, 0, 40);
 
         vox.CreateCube();
         vox.m_program = LoadShaders("src/shaders/vVoxelInstance.glsl", "src/shaders/fragment-basic.glsl");
         vox.InitGL(cubePositions);
 
-        glClearColor(0.2, 0.6, 0.4, 1.);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
 
@@ -90,6 +92,9 @@ namespace tvox {
             ImGui::Begin("Voxels");
             bool changed = ImGui::SliderInt("Voxels", &genVoxelNumber, 30, 200);
             ImGui::Text("Instances: %d", cubePositions.size());
+
+            ImGui::SliderFloat("Camera Speed", &input.speed, 0, 100);
+
             ImGui::End();
             gui.gui_end();
 

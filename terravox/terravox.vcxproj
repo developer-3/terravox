@@ -160,6 +160,7 @@
     <ClCompile Include="src\input.cpp" />
     <ClCompile Include="src\window.cpp" />
     <ClCompile Include="src\graphics\Texture.cpp" />
+    <ClCompile Include="src\Terrain.cpp" />
     <ClCompile Include="vendor\imgui\lib\imgui.cpp" />
     <ClCompile Include="vendor\imgui\lib\imgui_demo.cpp" />
     <ClCompile Include="vendor\imgui\lib\imgui_draw.cpp" />
@@ -177,6 +178,7 @@
     <ClInclude Include="src\input.h" />
     <ClInclude Include="src\window.h" />
     <ClInclude Include="src\graphics\Texture.h" />
+    <ClInclude Include="src\Terrain.h" />
     <ClInclude Include="vendor\imgui\include\imconfig.h" />
     <ClInclude Include="vendor\imgui\include\imgui.h" />
     <ClInclude Include="vendor\imgui\include\imgui_impl_glfw.h" />
