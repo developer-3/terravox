@@ -66,7 +66,7 @@ namespace tvox {
 
         // Init voxels
         //cubePositions = generate_voxel(genVoxelNumber, 0.3f, 1.0f, 50);
-        cubePositions = Terrain::GeneratePerlinTerrain(200, 0, 40);
+        cubePositions = Terrain::GeneratePerlinTerrain(genVoxelNumber, 0, 40);
 
         vox.CreateCube();
         vox.m_program = LoadShaders("src/shaders/vVoxelInstance.glsl", "src/shaders/fragment-basic.glsl");
@@ -90,6 +90,9 @@ namespace tvox {
             // render gui
             gui.gui_start();
             ImGui::Begin("Voxels");
+            ImGui::Text("Press tab to show mouse");
+
+            ImGui::Text("This is causes the program to run very slowly,\nI recommend changing the genVoxelNumber\nvariable in application.h instead");
             bool changed = ImGui::SliderInt("Voxels", &genVoxelNumber, 30, 200);
             ImGui::Text("Instances: %d", cubePositions.size());
 
@@ -101,7 +104,7 @@ namespace tvox {
             // this is rly slow to do at runtime
             if (changed)
             {
-                cubePositions = generate_voxel(genVoxelNumber, 0.5f, 1.0f, 3);
+                cubePositions = Terrain::GeneratePerlinTerrain(genVoxelNumber, 0, 40);
                 vox.InitGL(cubePositions);
             }
 

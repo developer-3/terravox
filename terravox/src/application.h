@@ -60,7 +60,7 @@ namespace tvox {
 
         std::vector<glm::vec3> cubePositions;
 
-        int genVoxelNumber = 100;
+        int genVoxelNumber = 200;
 
     private:
         Window window{ tvox::WIDTH, tvox::HEIGHT, "terravox" };
